@@ -1,6 +1,14 @@
+# Python cache
 __pycache__/
 *.py[cod]
-clothing_resale.db
 .venv/
+
+# Live local database (never commit real user data)
+clothing_resale.db
+clothing_resale.db-journal
+clothing_resale.db-wal
+clothing_resale.db-shm
+
+# Live user uploads; the bundled demo photos below are tracked deliberately
 uploads/*
 !uploads/.gitkeep

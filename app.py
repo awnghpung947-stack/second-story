@@ -2,6 +2,7 @@
 import os
 import re
 import secrets
+import shutil
 import sqlite3
 import uuid
 from functools import wraps
@@ -13,6 +14,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 ROOT = Path(__file__).resolve().parent
+SEED_DATABASE = ROOT / "demo" / "second_story_demo.db"
 app = Flask(__name__)
 app.config.update(
     SECRET_KEY=os.environ.get("SECRET_KEY", "change-this-local-development-key"),
@@ -65,6 +67,13 @@ def connect_db():
 def init_db():
     with connect_db() as db:
         db.executescript(SCHEMA)
+
+def prepare_database():
+    """Create the local database, seeding it with demo data on a fresh clone."""
+    db_path = Path(app.config["DATABASE"])
+    if not db_path.exists() and SEED_DATABASE.exists():
+        shutil.copyfile(SEED_DATABASE, db_path)
+    init_db()
 
 @app.before_request
 def before_request():
@@ -400,7 +409,7 @@ def too_large(error):
     return render_template("error.html", code=413, message="Images must be smaller than 5 MB."),413
 
 with app.app_context():
-    init_db()
+    prepare_database()
 
 if __name__ == "__main__":
     app.run(debug=True)
