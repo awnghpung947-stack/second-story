@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eef1ea">
+  <meta name="description" content="Second Story — a modern local marketplace for pre-loved clothing.">
+  <title>{% block title %}Second Story{% endblock %} | Second Story</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="site-header"><a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">S</span> SECOND STORY</a>
+<nav aria-label="Main navigation"><a href="{{ url_for('browse') }}">Browse</a>
+{% if current_user %}<a href="{{ url_for('add_clothing') }}">Sell an item</a><a href="{{ url_for('my_listings') }}">My listings</a><a href="{{ url_for('my_requests') }}">My requests</a><a href="{{ url_for('seller_requests') }}">Seller requests{% if pending_seller_requests %}<span class="nav-badge" title="Pending buyer requests">{{ pending_seller_requests }}</span>{% endif %}</a><a href="{{ url_for('profile') }}">{{ current_user.name }}</a>
+{% if current_user.role == 'admin' %}<a href="{{ url_for('admin_dashboard') }}">Admin</a>{% endif %}
+<form class="nav-form" action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="nav-logout">Log out</button></form>
+{% else %}<a href="{{ url_for('login') }}">Log in</a><a class="nav-cta" href="{{ url_for('register') }}">Join us</a>{% endif %}</nav></header>
+<main>{% with messages=get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-wrap">{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+{% block content %}{% endblock %}</main>
+<footer class="site-footer"><a class="brand" href="{{ url_for('index') }}">SECOND STORY</a><p>Good clothes deserve another chapter.</p><span>Student marketplace project · Made for more mindful wardrobes</span></footer>
+</body></html>

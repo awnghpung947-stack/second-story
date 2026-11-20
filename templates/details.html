@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}{{ item.name }}{% endblock %}
+{% block content %}
+<div class="detail-layout">
+  <div class="detail-image">
+    {% if item.image %}<img src="{{ url_for('uploaded_file', filename=item.image) }}" alt="{{ item.name }}">
+    {% else %}<div class="image-fallback">SECOND<br>STORY</div>{% endif %}
+  </div>
+  <section class="detail-copy">
+    <p class="eyebrow">{{ item.category }} · SIZE {{ item.size }}</p>
+    <h1>{{ item.name }}</h1>
+    <p class="detail-brand">{{ item.brand }} <span>·</span> {{ item.condition }}</p>
+    <p class="detail-price">₹{{ '%.2f'|format(item.price) }}</p>
+    <p class="detail-description">{{ item.description }}</p>
+    <div class="seller-box"><span>LISTED BY</span><strong>{{ item.seller_name }}</strong></div>
+
+    {% if my_request and my_request.status == 'accepted' %}
+      <div class="contact-box large">
+        <span>Seller confirmed · call or message</span>
+        <a href="tel:{{ revealed_phone }}">{{ revealed_phone }}</a>
+        <p class="small-note">Mention “{{ item.name }}” when you contact {{ item.seller_name }} to arrange the handover.</p>
+      </div>
+    {% elif item.status == 'sold' %}
+      <span class="status sold">Sold</span>
+    {% elif current_user and current_user.id == item.seller_id %}
+      <a class="button outline" href="{{ url_for('edit_clothing', item_id=item.id) }}">Manage your listing</a>
+    {% elif current_user and my_request and my_request.status == 'pending' %}
+      <div class="notice">Your request is with the seller. Their phone number will appear here as soon as they confirm it.</div>
+    {% elif current_user %}
+      <form method="post" action="{{ url_for('request_to_buy', item_id=item.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="button dark full" type="submit">Request to buy</button>
+      </form>
+    {% else %}
+      <a class="button dark full" href="{{ url_for('login', next=request.path) }}">Log in to request this piece</a>
+    {% endif %}
+
+    <p class="small-note">{% if item.status == 'sold' and not (my_request and my_request.status == 'accepted') %}This piece has found its next home. Browse the edit for more one-of-a-kind finds.{% else %}Send a request first. Once the seller confirms, their mobile number is shared with you so you can arrange the handover directly.{% endif %}</p>
+  </section>
+</div>
+{% endblock %}

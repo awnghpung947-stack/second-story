@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+clothing_resale.db
+.venv/
+uploads/*
+!uploads/.gitkeep

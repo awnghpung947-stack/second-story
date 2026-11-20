@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<section class="page-intro">
+  <p class="eyebrow">THE NEXT CHAPTER</p>
+  <h1>{{ title }}</h1>
+  {% if seller_view and pending_count %}
+    <p class="intro-note">{{ pending_count }} request{{ 's' if pending_count != 1 }} waiting for your decision. Accept a request to share your mobile number with that buyer.</p>
+  {% elif not seller_view %}
+    <p class="intro-note">When a seller accepts your request, their mobile number appears here.</p>
+  {% endif %}
+</section>
+
+{% if rows %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Piece</th>
+        <th>{{ 'Buyer' if seller_view else 'Seller' }}</th>
+        <th>Requested</th>
+        <th>Status</th>
+        <th>{{ 'Decision & contact' if seller_view else 'Contact' }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td><a href="{{ url_for('details', item_id=row.clothing_id) }}">{{ row.item_name }}</a><small>₹{{ '%.0f'|format(row.price) }}</small></td>
+        <td>{{ row.buyer_name if seller_view else row.seller_name }}</td>
+        <td>{{ row.request_date }}</td>
+        <td><span class="status {{ row.status }}">{{ row.status }}</span></td>
+        <td>
+          {% if row.status == 'pending' %}
+            {% if seller_view %}
+              <div class="decision-buttons">
+                {% for action in ['accept', 'reject'] %}
+                <form method="post" action="{{ url_for('decide_request', request_id=row.id, action=action) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button class="{{ action }}">{{ action|capitalize }}</button>
+                </form>
+                {% endfor %}
+              </div>
+            {% else %}
+              <span class="contact-hint">Waiting for the seller to confirm.</span>
+            {% endif %}
+          {% elif row.status == 'accepted' %}
+            <div class="contact-box">
+              <span>{{ "Buyer's phone" if seller_view else (row.seller_name ~ "'s phone") }}</span>
+              <a href="tel:{{ row.buyer_phone if seller_view else row.seller_phone }}">{{ row.buyer_phone if seller_view else row.seller_phone }}</a>
+            </div>
+          {% else %}
+            <span class="contact-hint">Request declined.</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <span>↗</span>
+  <h3>No requests just yet.</h3>
+  <p>{% if seller_view %}When a buyer asks about your listing, it will appear here.{% else %}Request a piece you like and track its progress here.{% endif %}</p>
+</div>
+{% endif %}
+{% endblock %}
